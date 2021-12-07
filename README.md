@@ -1,6 +1,6 @@
 # Lost Legacy
 
-This is a CTF from [ph0wn](https://ctf.ph0wn.org/) 2021.
+This is a CTF from [ph0wn](https://ph0wn.org/) 2021.
 
 Thank to the team at ph0wn for the great CTF!
 
@@ -35,7 +35,7 @@ The instructions gives us a few names an mention Oberon (I'm still not sure if i
 
 After some research arround the subject (and a big hint on the discord :eyes:), I arrived to the conclusion that the `.sym` is bytecode from Modula 2.
 
-More research on Modula brought me to this github user: Oric4ever (https://github.com/Oric4ever).
+More research on Modula brought me to this github user: [Oric4ever](https://github.com/Oric4ever).
 
 ## Run the program:
 
