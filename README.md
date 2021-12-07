@@ -163,6 +163,8 @@ We could try the same approche to print passwords, but sadly, the program compar
 
 We could continue to do crazy stuff by patching the programe: for instance, `proc1` is likely to be a bijection, so applying `proc1` to the cipher text enought times will endup deciphering the text. But its not worth it.
 
+Relevent XKCD: https://xkcd.com/378
+
 ### Reversing and breaking the encryption procedure
 
 `proc1` can be translate by:
