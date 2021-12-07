@@ -1,0 +1,203 @@
+module start at 0140
+0140 : Module GREET
+	depends on TERMINAL 
+	depends on FILES 
+	depends on TEXTS 
+
+GREET.proc0: 011c
+GREET.proc1: 0032
+GREET.proc2: 005b
+GREET.proc3: 0001
+GREET.proc4: 004e
+
+# GREET.proc3:  # CF the python code for this one
+0001  d4 f9     enter -7
+0003  91        load immediate 1
+0004  33        store local word-3
+0005  91        load immediate 1
+0006  32        store local word-2
+0007  03        load param1
+0008  8d ff     load immediate 255
+000a  e8        bitwise_and
+000b  34        store local word-4
+000c  22        load local word-2
+000d  24        load local word-4
+000e  a4        uless_or_equal
+000f  e3 1a     jpfalse 002b
+0011  23        load local word-3
+0012  23        load local word-3
+0013  a6        add
+0014  23        load local word-3
+0015  a6        add
+0016  33        store local word-3
+0017  23        load local word-3
+0018  8e 00 01  load immediate 256
+001b  a3        ugreater_than
+001c  e3 08     jpfalse 0026
+001e  23        load local word-3
+001f  8e ff fe  load immediate -257
+0022  a6        add
+0023  33        store local word-3
+0024  e4 0f     jp 0017
+0026  22        load local word-2
+0027  ac        inc
+0028  32        store local word-2
+0029  e4 1f     jp 000c
+002b  23        load local word-3
+002c  8d ff     load immediate 255
+002e  e8        bitwise_and
+002f  85 81     fct_leave 129
+0031  ff        
+
+# GREET.proc1:  # Encrypt / HASH ? ciffer(string, len)
+0032  d4 fb     enter -5
+0034  90        load immediate 0
+0035  32        store local word-2  # w2 = 0
+0036  04        load param2         # start of loop
+0037  22        load local word-2
+0038  0d        load indexed byte
+0039  33        store local word-3  # w3 = str[w2] ?
+003a  04        load param2
+003b  22        load local word-2
+003c  23        load local word-3
+003d  22        load local word-2
+003e  a6        add                 # load w2 + str[w2] ?
+003f  f3        call proc3
+0040  1d        store indexed byte  # str[w2] = proc3(w2+str[w2])
+0041  22        load local word-2   # w2 ++
+0042  ac        inc
+0043  32        store local word-2
+0044  22        load local word-2
+0045  03        load param1
+0046  a3        ugreater_than       # w2 > len
+0047  df 02     orjp 004b
+0049  23        load local word-3
+004a  ab        eq0
+004b  e5 17     jpfalse 0036
+004d  8a        leave4
+
+GREET.proc4:
+004e  64        load stack word4
+004f  61        load stack word1
+0050  74        store stack word4
+0051  61        load stack word1
+0052  62        load stack word2
+0053  61        load stack word1
+0054  73        store stack word3
+0055  65        load stack word5
+0056  2e 62     load stack word 98
+0058  69        load stack word9
+0059  6e        load stack word14
+005a  ff        
+
+# GREET.proc2:
+005b  d4 f3     enter -13
+005d  8d 80     load immediate 128
+005f  d2        reserve
+0060  33        store local word-3
+0061  8d 10     load immediate 16
+0063  d2        reserve
+0064  34        store local word-4
+0065  8d 20     load immediate 32
+0067  d2        reserve
+0068  35        store local word-5
+0069  8c 05  .. load immediate string "Id : "
+0070  94        load immediate 4
+0071  f0 07     call TERMINAL.WriteString
+0073  24        load local word-4           
+0074  9f        load immediate 15
+0075  f0 04     call TERMINAL.ReadLine
+0077  24        load local word-4           # word-4 = ID
+0078  9f        load immediate 15
+0079  f1        call proc1
+007a  8c 05  .. load immediate string "Pwd: "
+0081  94        load immediate 4
+0082  f0 07     call TERMINAL.WriteString
+0084  25        load local word-5 
+0085  8d 1f     load immediate 31
+0087  f0 04     call TERMINAL.ReadLine
+0089  25        load local word-5           # word-5 = Pwd
+008a  8d 1f     load immediate 31
+008c  f1        call proc1
+008d  80 fe     load local address -2
+008f  02 04     load proc_addr proc4
+0091  9b        load immediate 11
+0092  f0 11     call FILES.Open              
+0094  e3 6a     jpfalse 0100                 # if open fails
+0096  22        load local word-2
+0097  ef 01 14  call FILES.NoTrailer
+009a  90        load immediate 0
+009b  37        store local word-7           # let's call word-7 "user_found"
+009c  22        load local word-2            # while (not end of file and not user_found) ----
+009d  f0 18     call FILES.EOF               # // word-2 is the file descriptor
+009f  b6        not
+00a0  de 02     andjp 00a4
+00a2  27        load local word-7
+00a3  b6        not
+00a4  e3 1d     jpfalse 00c3
+00a6  22        load local word-2
+00a7  23        load local word-3
+00a8  8d 3f     load immediate 63
+00aa  f0 1b     call FILES.ReadRec           # read(database, world-3)
+00ac  24        load local word-4            # // read 64 bytes? and put it in world-3
+00ad  23        load local word-3
+00ae  8d 10     load immediate 16
+00b0  8d 10     load immediate 16
+00b2  c4        string_comp                   # user_found = (word-3 == cipher(ID))
+00b3  a0        equal
+00b4  de 0a     andjp 00c0
+00b6  25        load local word-5
+00b7  23        load local word-3
+00b8  82 08     load stack address 8         # <- not sure what is does? add an offset?
+00ba  8d 20     load immediate 32
+00bc  8d 20     load immediate 32
+00be  c4        string_comp                   # user_found &= (word-3bis == cipher(PWD))
+00bf  a0        equal
+00c0  37        store local word-7
+00c1  e4 27     jp 009c                       # end while ----------------------------------------
+00c3  8c 07  .. load immediate string "Access "
+00cc  96        load immediate 6
+00cd  f0 07     call TERMINAL.WriteString
+00cf  27        load local word-7
+00d0  e3 20     jpfalse 00f2
+00d2  8c 0a  .. load immediate string "granted..."
+00de  99        load immediate 9
+00df  f0 07     call TERMINAL.WriteString
+00e1  f0 06     call TERMINAL.WriteLn
+00e3  23        load local word-3
+00e4  82 18     load stack address 24
+00e6  8d 4f     load immediate 79
+00e8  f1        call proc1                    # This is intersting.
+00e9  23        load local word-3             # Eigher the cipher is an involution (doubious)
+00ea  82 18     load stack address 24         # or the greeting is encoded with the invers of 
+00ec  8d 4f     load immediate 79             # cipher
+00ee  f0 07     call TERMINAL.WriteString
+00f0  e2 0c     jp 00fe
+00f2  8c 07  .. load immediate string "denied."
+00fb  96        load immediate 6
+00fc  f0 07     call TERMINAL.WriteString
+00fe  e2 14     jp 0114
+0100  02 04     load proc_addr proc4                # *proc4 = database.bin
+0102  9b        load immediate 11
+0103  f0 07     call TERMINAL.WriteString
+0105  8c 0a  .. load immediate string " not found"
+0111  99        load immediate 9
+0112  f0 07     call TERMINAL.WriteString
+0114  f0 06     call TERMINAL.WriteLn
+0116  80 fe     load local address -2
+0118  f0 13     call FILES.Close
+011a  88        leave0
+011b  ff   
+
+# GREET.proc0:
+011c  d4 ff     enter -1
+011e  f2        call proc2
+011f  50        end_program
+0120  2d ff     load global word 255
+0122  de fe     andjp 0222
+0124  36        store local word-6
+0125  ff        call proc15
+0126  0b ff f3  load .dword243
+
+
+
