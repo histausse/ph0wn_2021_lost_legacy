@@ -2,7 +2,7 @@
 
 This is a CTF from [ph0wn](https://ph0wn.org/) 2021.
 
-Thank to the team at ph0wn for the great CTF!
+Thanks to the team at ph0wn for the great CTF!
 
 ## Subject: 
 
@@ -18,7 +18,7 @@ Pico would gladly accept help from Martin Odersky or Peter Sollich, but these gu
 Flags: There are 2 flags to find for this challenge, 1 for "Lost Legacy 1" and 1 for "Lost Legacy 2". You should normally find the first flag (for "Lost Legacy 1") before the second, but it is not totally impossible you find them in a different order. If this is the case and you find a valid flag but it is "not valid", try it on "Lost Legacy 2" (or reciprocally).
 ```
 
-This challenge provide us with a `.sym`, a `.cmd` and a `database.bin`. 
+This challenge provides us with a `.sym`, a `.cmd` and a `database.bin`. 
 
 Obviously, `file` does not recognize the format:
 
@@ -31,7 +31,7 @@ $ file database.bin
 database.bin: data
 ```
 
-The instructions gives us a few names an mention Oberon (I'm still not sure if it is a language, an OS, or both).
+The instructions give us a few names an mention Oberon (I'm still not sure if it is a language, an OS, or both).
 
 After some research arround the subject (and a big hint on the discord :eyes:), I arrived to the conclusion that the `.sym` is bytecode from Modula 2.
 
@@ -56,7 +56,7 @@ cd phown
 greet # start the program
 ```
 
-First test to see if it works: try the given credentials:
+Let's test `greet.mcd` to see if it works. Try the given credentials:
 
 ```
 Id : Niklaus Wirth
@@ -78,15 +78,15 @@ gcc unassemble.c -o unassemble
 ./unassemble ../greet.mcd
 ```
 
-It takes a minute to get used to the syntax. The main point is the use of the stack for everything. Some functions/instructions are not really clear on what they take on argmument, but on the whole, it is readable.
+It takes a minute to get used to the syntax. The main point is the use of the stack for everything. Some functions/instructions are not really clear on what they take as argmument, but on the whole, it is readable.
 
-There are 3 main procedures: `proc2` is the main function, `proc1` takes an array as argument end cipher it in place, `proc3` takes a byte in input and return a byte. `proc2` maps its input with `proc3`. For more details on `proc1` and `proc3`, see the equivalent code in `cipher.py`
+There are 3 main procedures: `proc2` is the main function, `proc1` takes an array as argument and cipher it in place, `proc3` takes a byte in input and returns a byte. `proc2` maps its input with `proc3`. For more details on `proc1` and `proc3`, see the equivalent code in `cipher.py`
 
 ### Patching
 
 In `proc2`, we can see that the program decipher the greeting message from the database when the access is granted. Let's try to trick it to display a message without having the password.
 
-Here is the line (`00d0`) checking if the access is granted:
+Here is the line (`00d0`) that check if the access is granted:
 
 ```
 00cf  27        load local word-7                   # <-- word-7 = access granted
@@ -96,10 +96,10 @@ Here is the line (`00d0`) checking if the access is granted:
 
 Reminder: the jump destination is given by an offset in the binary instruction: `0x00f2=0x00d2+0x20`.
 
-If we replace the `20` by `0` in the binary, the jump does nothing. Let's try that:
+If we replace the `20` by `0` in the binary, the jump will do nothing. Let's try that:
 
-To patch the file, we can open `greet.mcd` with vim and use the command `:%!xxd` to get a hexa representation of the file. We just have to find the byte to modify and change it, but carefull not to touch anything else (`xxd` is touchy, even replacing a space by another space can have strange results on the binary). When it's done, `:%!xxd -r` to get back the binary format, save the file, put it on the emulator, and:
-`:%!xxd -e`: `-e` because little endian
+To patch the file, we can open `greet.mcd` with vim and use the command `:%!xxd` to get an hexa representation of the file. We just have to find the byte to modify and change it, but be carefull not to touch anything else (`xxd` is touchy, even replacing a space by another space can have strange results on the binary). When it's done, `:%!xxd -r` to get back the binary format, save the file, put it on the emulator, and:
+
 
 ```
 # greet2
@@ -109,9 +109,9 @@ Access granted...
 (Intergalactic) Digital Research, Inc. Welcome, CEO, greetings to Dorothy...
 ```
 
-Patching works! But can onlu get the greetings for the last user of the database.
+Patching works! But we can only get the greeting for the last user of the database.
 
-Well, no probleme, let's patch a little more. Adding code in the middle of a binary is tricky, it might broke the program in a lot of way, so it is better to replace existing code by new code. Good think the tests that checks if the user and the password match take some place. We override those (after all, who need authentication?). We want to read the greating message from the file, apply `proc1` to it, then print the result. Here is the code:
+Well, no probleme, let's patch a little more. Adding code in the middle of a binary is tricky, it might broke the program in a lot of ways, so it is better to replace existing code by new code. Good think the tests that check if the user and the password match take some place. We can override those (after all, who need authentication?). We want to read the greating message from the file, apply `proc1` to it, then print the result. Here is the code:
 
 ```
 23        load local word-3
@@ -159,7 +159,7 @@ YES!!! Ph0wn{Pico hack3d this place!} Greetings to Axelle & Ludo...
 Access denied.
 ```
 
-We could try the same approche to print passwords, but sadly, the program compare the ciphered version of the IDs/Pwds in input with the already cipher version of the database.
+We could try the same approche to print passwords, but sadly, the program compares the ciphered version of the IDs/Pwds in input with the already ciphered version from the database.
 
 We could continue to do crazy stuff by patching the programe: for instance, `proc1` is likely to be a bijection, so applying `proc1` to the cipher text enought times will endup deciphering the text. But its not worth it.
 
@@ -167,7 +167,7 @@ Relevent XKCD: https://xkcd.com/378
 
 ### Reversing and breaking the encryption procedure
 
-`proc1` can be translate by:
+`proc1` can be translated by:
 
 ```python
 def proc1(leng:int, s:str):
@@ -179,7 +179,7 @@ def proc1(leng:int, s:str):
 And `proc3` by:
 
 ```python
-def proc3(a):
+def proc3(a:int)->int:
     w3 = 1
 	w2 = 1
 	w4 = a & 255
@@ -191,7 +191,7 @@ def proc3(a):
     return w3 & 255
 ```
 
-There is a usable version of those function in `cipher.py`. Let's test it:
+There is an usable version of those functions in `cipher.py`. Let's test it:
 
 ```
 $ python cipher.py "Niklaus Wirth"
@@ -216,7 +216,7 @@ As you can see, we get back the ciphered version of `"Niklaus Wirth"` found in t
 
 Now, let's break it.
 
-We have a small problem, because we have to find the number of time we execute a loop. We will have to do the hypothesis that `w2 > (a & 255)` is equivalent to `(w3 & 255) == proc3(a)`. From this hypothesis, it is not too hard to write a `decipher` function:
+We have a small problem: we have to find the number of time a loop is executed. We will have to do the hypothesis that `w2 > (a & 255)` is equivalent to `(w3 & 255) == proc3(a)`. From this hypothesis, it is not too hard to write a `decipher` function:
 
 ```python
 def decipher(l:list[int])->str:
@@ -233,7 +233,7 @@ def decipher(l:list[int])->str:
     return "".join(values)
 ```
 
-My problem now is that I'm not to sure about how the database is parsed. It looks alligned enought, so I doubt I will decipher every chunks of `32` bytes alligned with `16` bytes:
+My problem now is that I'm not too sure about how the database is parsed. It looks alligned enought, so in doubt, I will decipher every chunks of `32` bytes alligned to `16` bytes:
 
 ```python
 def read_database():
@@ -296,7 +296,7 @@ chr() arg not in range(0x110000)
 chr() arg not in range(0x110000)
 ```
 
-We can see that `Pico le croco` uses the password `Ph0wn{TM2 hacks NW's work!}` :)
+Now, can see that `Pico le croco` uses the password `Ph0wn{TM2 hacks NW's work!}` :)
 
 Just for fun:
 
